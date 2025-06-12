@@ -9,6 +9,6 @@ public class SecurityConstants {
     public static final String AUTH_HEADER = "Authorization";
     public static final String INVALID_CREDENTIALS = "Invalid credentials.";
     public static final String INVALID_JWT_TOKEN = "Invalid JWT";
-    public static final String NOT_AUTHORIZED = "User not authorized for this action.";
+    public static final String USER_NOT_AUTHORIZED = "User not authorized for this action.";
 
 }
