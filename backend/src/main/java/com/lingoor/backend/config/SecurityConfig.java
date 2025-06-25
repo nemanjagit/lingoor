@@ -1,7 +1,8 @@
 package com.lingoor.backend.config;
 
-import com.lingoor.backend.constants.SecurityConstants;
+import com.lingoor.backend.constants.Constants;
 import com.lingoor.backend.filters.JwtAuthenticationFilter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,8 +20,12 @@ import org.springframework.web.cors.CorsConfiguration;
 import java.util.Collections;
 import java.util.List;
 
+@RequiredArgsConstructor
 @Configuration
 public class SecurityConfig {
+
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         // Create a delegating password encoder which supports multiple encoding formats (e.g., bcrypt)
@@ -48,20 +53,20 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cc -> cc.configurationSource(request -> {
                     CorsConfiguration config = new CorsConfiguration();
-                    config.setAllowedOrigins(Collections.singletonList(SecurityConstants.FRONTEND_APP_URL)); // Allow requests only from this origin (Angular frontend)
+                    config.setAllowedOrigins(Collections.singletonList(Constants.FRONTEND_APP_URL)); // Allow requests only from this origin (Angular frontend)
                     config.setAllowedMethods(Collections.singletonList("*")); // Allow all HTTP methods (GET, POST, PUT, DELETE, etc.)
                     config.setAllowCredentials(true); // Allow credentials (cookies, Authorization headers, etc.)
                     config.setAllowedHeaders(Collections.singletonList("*")); // Allow all headers in the request
-                    config.setExposedHeaders(List.of(SecurityConstants.AUTH_HEADER)); // Expose Authorization header to the client
+                    config.setExposedHeaders(List.of(Constants.AUTH_HEADER)); // Expose Authorization header to the client
                     config.setMaxAge(3600L); // Cache the CORS configuration for 1 hour
                     return config;
                 }))
                 //allow login, register and community feed
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**", "/api/feed/community/**").permitAll()
+                        .requestMatchers("/login", "/register", "/feed/community/**").permitAll()
                         .anyRequest().authenticated()
                 )
-                .addFilterBefore(new JwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 }

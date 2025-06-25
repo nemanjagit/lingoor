@@ -1,6 +1,6 @@
 package com.lingoor.backend.services;
 
-import com.lingoor.backend.constants.SecurityConstants;
+import com.lingoor.backend.constants.Constants;
 import com.lingoor.backend.models.User;
 import com.lingoor.backend.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,11 +21,11 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<User> optionalUser = userRepository.findByUsername(username);
+        Optional<User> optionalUser = userRepository.findByEmail(username); // still called "username" because of Spring Security
 
         // If no matching user is found, throw an exception indicating invalid credentials
         if (optionalUser.isEmpty())
-            throw new BadCredentialsException(SecurityConstants.INVALID_CREDENTIALS);
+            throw new BadCredentialsException(Constants.INVALID_CREDENTIALS);
 
         User user = optionalUser.get();
 

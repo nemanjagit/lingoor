@@ -1,6 +1,6 @@
 package com.lingoor.backend.config;
 
-import com.lingoor.backend.constants.SecurityConstants;
+import com.lingoor.backend.constants.Constants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -37,7 +37,7 @@ public class UsernamePasswordAuthenticationProvider implements AuthenticationPro
             return new UsernamePasswordAuthenticationToken(userDetails.getUsername(), password, userDetails.getAuthorities());
         } else {
             // If the password is invalid, throw an exception
-            throw new BadCredentialsException(SecurityConstants.INVALID_CREDENTIALS);
+            throw new BadCredentialsException(Constants.INVALID_CREDENTIALS);
         }
     }
 
