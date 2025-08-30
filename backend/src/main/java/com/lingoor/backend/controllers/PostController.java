@@ -1,9 +1,13 @@
 package com.lingoor.backend.controllers;
 
+import com.lingoor.backend.dtos.FeedPostResponse;
 import com.lingoor.backend.dtos.PostRequest;
 import com.lingoor.backend.dtos.PostResponse;
+import com.lingoor.backend.exceptions.UnauthorizedException;
 import com.lingoor.backend.services.PostService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,18 +23,26 @@ public class PostController {
 
     private final PostService postService;
 
-    /**
-     * Retrieve all posts, newest first
-     */
     @GetMapping
-    public ResponseEntity<List<PostResponse>> getAllPosts() {
-        List<PostResponse> posts = postService.getAllPosts();
-        return ResponseEntity.ok(posts);
+    public ResponseEntity<List<FeedPostResponse>> getCommunityFeed(
+            Principal principal,
+            @RequestParam(defaultValue = "0") @Min(0) int page,
+            @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size
+    ) {
+        String email = (principal != null) ? principal.getName() : null;
+        return ResponseEntity.ok(postService.getCommunityFeed(email, page, size));
     }
 
-    /**
-     * Create a new post
-     */
+    @GetMapping("/personalized")
+    public ResponseEntity<List<FeedPostResponse>> getPersonalizedFeed(
+            Principal principal,
+            @RequestParam(defaultValue = "0") @Min(0) int page,
+            @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size
+    ) {
+        if (principal == null) throw new UnauthorizedException();
+        return ResponseEntity.ok(postService.getPersonalizedFeed(principal.getName(), page, size));
+    }
+
     @PostMapping
     public ResponseEntity<PostResponse> createPost(
             @RequestBody @Valid PostRequest request,
@@ -40,9 +52,6 @@ public class PostController {
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
-    /**
-     * Update an existing post (must be the author)
-     */
     @PutMapping("/{id}")
     public ResponseEntity<PostResponse> updatePost(
             @PathVariable Long id,
@@ -53,9 +62,6 @@ public class PostController {
         return ResponseEntity.ok(updated);
     }
 
-    /**
-     * Delete a post by id (must be the author)
-     */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePost(
             @PathVariable Long id,

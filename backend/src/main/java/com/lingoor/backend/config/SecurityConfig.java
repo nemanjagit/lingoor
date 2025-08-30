@@ -28,17 +28,13 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        // Create a delegating password encoder which supports multiple encoding formats (e.g., bcrypt)
-        // The default is bcrypt, and the stored password includes an ID to indicate the encoding type
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
 
     @Bean
     public AuthenticationManager authenticationManager(UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
-        // Create a custom AuthenticationProvider that uses the provided UserDetailsService and PasswordEncoder
         UsernamePasswordAuthenticationProvider authenticationProvider = new UsernamePasswordAuthenticationProvider(userDetailsService, passwordEncoder);
 
-        // Create a ProviderManager with the custom provider
         ProviderManager providerManager = new ProviderManager(authenticationProvider);
 
         // Prevent credentials (e.g., passwords) from being erased after authentication

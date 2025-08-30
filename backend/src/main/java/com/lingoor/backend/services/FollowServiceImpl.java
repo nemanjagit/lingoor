@@ -9,7 +9,6 @@ import com.lingoor.backend.repositories.FollowRepository;
 import com.lingoor.backend.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
 import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,15 +23,15 @@ public class FollowServiceImpl implements FollowService {
 
     @Override
     public FollowResponse followUser(String followerEmail, Long followedId) {
-        if (followRepository.existsByFollower_EmailAndFollowed_Id(followerEmail, followedId)) {
-            throw new AlreadyFollowingException(followedId);
-        }
         User follower = userRepository.findByEmail(followerEmail)
                 .orElseThrow(ResourceNotFoundException::new);
         User followed = userRepository.findById(followedId)
                 .orElseThrow(ResourceNotFoundException::new);
 
-        // Delegate entity creation to mapper
+        if (followRepository.existsByFollower_IdAndFollowed_Id(follower.getId(), followedId)) {
+            throw new AlreadyFollowingException(followedId);
+        }
+
         var follow = FollowMapper.toEntity(follower, followed);
         var saved = followRepository.save(follow);
         return FollowMapper.toDto(saved);
@@ -45,17 +44,20 @@ public class FollowServiceImpl implements FollowService {
         User followed = userRepository.findById(followedId)
                 .orElseThrow(ResourceNotFoundException::new);
 
-        if (followRepository.existsByFollower_EmailAndFollowed_Id(followerEmail, followedId)) {
-            followRepository.deleteByFollower_EmailAndFollowed_Id(followerEmail, followedId);
+        if (followRepository.existsByFollower_IdAndFollowed_Id(follower.getId(), followedId)) {
+            followRepository.deleteByFollower_IdAndFollowed_Id(follower.getId(), followedId);
         }
 
-        // Return a simple DTO without an actual entity
         return new FollowResponse(follower.getId(), followed.getId());
     }
 
     @Override
     public List<String> getFollowedUserEmails(String followerEmail) {
-        return followRepository.findFollowedUsersByFollowerEmail(followerEmail)
+        Long followerId = userRepository.findByEmail(followerEmail)
+                .map(User::getId)
+                .orElseThrow(ResourceNotFoundException::new);
+
+        return followRepository.findFollowedByFollower_Id(followerId)
                 .stream()
                 .map(User::getEmail)
                 .collect(Collectors.toList());

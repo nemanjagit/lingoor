@@ -1,6 +1,7 @@
 package com.lingoor.backend.controllers;
 
 import com.lingoor.backend.dtos.FollowResponse;
+import com.lingoor.backend.exceptions.UnauthorizedException;
 import com.lingoor.backend.services.FollowService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,30 +19,22 @@ public class FollowController {
 
     private final FollowService followService;
 
-    /**
-     * Follow a user by ID.
-     * @param id the ID of the user to follow
-     * @param principal authenticated user principal
-     */
     @PostMapping("/{id}/follow")
     public ResponseEntity<FollowResponse> followUser(
             @PathVariable("id") Long id,
             Principal principal
     ) {
+        if (principal == null) throw new UnauthorizedException();
         FollowResponse response = followService.followUser(principal.getName(), id);
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * Unfollow a user by ID.
-     * @param id the ID of the user to unfollow
-     * @param principal authenticated user principal
-     */
     @DeleteMapping("/{id}/follow")
     public ResponseEntity<FollowResponse> unfollowUser(
             @PathVariable("id") Long id,
             Principal principal
     ) {
+        if (principal == null) throw new UnauthorizedException();
         FollowResponse response = followService.unfollowUser(principal.getName(), id);
         return ResponseEntity.ok(response);
     }

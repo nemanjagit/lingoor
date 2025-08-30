@@ -21,22 +21,19 @@ public class UsernamePasswordAuthenticationProvider implements AuthenticationPro
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        // Extract the input identifier (could be username or email)
+        // Extract the input identifier (email)
         String identifier = authentication.getName();
 
         // Extract the raw password entered by the user
         String password = authentication.getCredentials().toString();
 
-        // Load the user by the identifier (username or email)
-        // This assumes your UserDetailsService implementation supports both
+        // Load the user by the identifier (email)
         UserDetails userDetails = userDetailsService.loadUserByUsername(identifier);
 
         // Compare the raw password with the encoded one from the database
         if (passwordEncoder.matches(password, userDetails.getPassword())) {
-            // If the passwords match, create and return an authenticated token
             return new UsernamePasswordAuthenticationToken(userDetails.getUsername(), password, userDetails.getAuthorities());
         } else {
-            // If the password is invalid, throw an exception
             throw new BadCredentialsException(Constants.INVALID_CREDENTIALS);
         }
     }

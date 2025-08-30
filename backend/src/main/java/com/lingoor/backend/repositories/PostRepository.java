@@ -1,15 +1,17 @@
 package com.lingoor.backend.repositories;
 
 import com.lingoor.backend.models.Post;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+
 import java.util.List;
-import java.util.Optional;
 
 public interface PostRepository extends JpaRepository<Post, Long> {
 
-    List<Post> findAllByOrderByCreatedAtDesc();
+    Page<Post> findAll(Pageable pageable); // (optional; JpaRepository already has this)
 
-    Optional<Post> findByIdAndAuthor_Email(Long id, String authorEmail);
+    Page<Post> findByAuthor_IdIn(List<Long> authorIds, Pageable pageable);
 
     boolean existsByIdAndAuthor_Email(Long id, String authorEmail);
 }
