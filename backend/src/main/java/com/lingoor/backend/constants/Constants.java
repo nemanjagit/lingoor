@@ -2,7 +2,7 @@ package com.lingoor.backend.constants;
 
 public class Constants {
 
-    public static final String FRONTEND_APP_URL = "http://localhost:5173";
+    public static final String FRONTEND_APP_URL = "http://localhost:4200";
     public static final String CLAIM_IDENTIFIER = "email";
     public static final String JWT_SECRET_KEY = "JWT_SECRET";
     public static final String JWT_SECRET_KEY_DEFAULT_VALUE = "jxgEQeXHuPq8VdbyYFNkANdudQ53YUn4";

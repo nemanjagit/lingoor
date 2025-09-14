@@ -5,6 +5,7 @@ import com.lingoor.backend.filters.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -59,7 +60,9 @@ public class SecurityConfig {
                 }))
                 //allow login, register and community feed
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login", "/register", "/feed/community/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/register", "/api/login").permitAll()
+                        .requestMatchers(HttpMethod.GET,  "/api/posts").permitAll()                           // ONLY the community feed
+                        .requestMatchers(HttpMethod.GET,  "/api/posts/*/likes/count").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
