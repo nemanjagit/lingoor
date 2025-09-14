@@ -1,0 +1,25 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container-fluid">
+    <a class="navbar-brand" routerLink="/">Lingoor</a>
+
+    <div class="collapse navbar-collapse">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/feed/community">Community</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/feed/personalized">Personalized</a>
+        </li>
+      </ul>
+
+      <div class="d-flex">
+        <a class="btn btn-outline-light me-2" routerLink="/auth/login">Login</a>
+        <a class="btn btn-warning" routerLink="/auth/register">Register</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="container mt-4">
+  <router-outlet></router-outlet>
+</div>
