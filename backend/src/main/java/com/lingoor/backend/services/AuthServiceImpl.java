@@ -43,7 +43,7 @@ public class AuthServiceImpl implements AuthService {
 
         userRepository.save(user);
 
-        String jwt = jwtService.generateToken(user.getEmail());
+        String jwt = jwtService.generateToken(user);
         return new AuthResponse(jwt);
     }
 
@@ -57,7 +57,7 @@ public class AuthServiceImpl implements AuthService {
             throw new InvalidCredentialsException();
         }
 
-        String jwt = jwtService.generateToken(user.getEmail());
+        String jwt = jwtService.generateToken(user);
         return new AuthResponse(jwt);
     }
 }
