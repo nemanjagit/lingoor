@@ -60,9 +60,9 @@ public class SecurityConfig {
                 }))
                 //allow login, register and community feed
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.POST, "/api/register", "/api/login").permitAll()
-                        .requestMatchers(HttpMethod.GET,  "/api/posts").permitAll()                           // ONLY the community feed
-                        .requestMatchers(HttpMethod.GET,  "/api/posts/*/likes/count").permitAll()
+                        .requestMatchers(HttpMethod.POST, "register", "login").permitAll()
+                        .requestMatchers(HttpMethod.GET,  "posts").permitAll()                           // ONLY the community feed
+                        .requestMatchers(HttpMethod.GET,  "posts/*/likes/count").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
