@@ -3,19 +3,19 @@ package com.lingoor.backend.services;
 import com.lingoor.backend.dtos.FeedPostResponse;
 import com.lingoor.backend.dtos.PostRequest;
 import com.lingoor.backend.dtos.PostResponse;
+import com.lingoor.backend.exceptions.ResourceNotFoundException;
 import com.lingoor.backend.mappers.PostMapper;
+import com.lingoor.backend.models.DailyHighlight;
 import com.lingoor.backend.models.Follow;
 import com.lingoor.backend.models.Post;
 import com.lingoor.backend.models.User;
-import com.lingoor.backend.repositories.FollowRepository;
-import com.lingoor.backend.repositories.LikeRepository;
-import com.lingoor.backend.repositories.PostRepository;
-import com.lingoor.backend.repositories.UserRepository;
+import com.lingoor.backend.repositories.*;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 
@@ -26,17 +26,19 @@ public class PostServiceImpl implements PostService {
     private final UserRepository userRepository;
     private final LikeRepository likeRepository;
     private final FollowRepository followRepository;
+    private final DailyHighlightRepository dailyHighlightRepository;
 
     public PostServiceImpl(
             PostRepository postRepository,
             UserRepository userRepository,
             LikeRepository likeRepository,
-            FollowRepository followRepository
+            FollowRepository followRepository, DailyHighlightRepository dailyHighlightRepository
     ) {
         this.postRepository = postRepository;
         this.userRepository = userRepository;
         this.likeRepository = likeRepository;
         this.followRepository = followRepository;
+        this.dailyHighlightRepository = dailyHighlightRepository;
     }
 
     @Override
@@ -118,4 +120,49 @@ public class PostServiceImpl implements PostService {
                 })
                 .getContent();
     }
+
+    @Transactional
+    public void setWordOfTheDay(Long postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(ResourceNotFoundException::new);
+
+        LocalDate today = LocalDate.now();
+
+        DailyHighlight dailyHighlight = dailyHighlightRepository.findByDate(today).orElse(null);
+
+        if (dailyHighlight != null) {
+            dailyHighlight.setPost(post);
+            dailyHighlightRepository.save(dailyHighlight);
+        } else {
+            DailyHighlight highlight = DailyHighlight.builder()
+                    .date(today)
+                    .post(post)
+                    .build();
+            dailyHighlightRepository.save(highlight);
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public FeedPostResponse getWordOfTheDay(String currentUserEmail) {
+        LocalDate today = LocalDate.now();
+
+        DailyHighlight highlight = dailyHighlightRepository.findByDate(today)
+                .orElseThrow(ResourceNotFoundException::new);
+
+        Post post = highlight.getPost();
+
+        long likeCount = likeRepository.countByPostId(post.getId());
+        boolean likedByMe = false;
+
+        if (currentUserEmail != null) {
+            Long currentUserId = userRepository.findByEmail(currentUserEmail)
+                    .map(User::getId)
+                    .orElseThrow(() -> new IllegalArgumentException("User not found: " + currentUserEmail));
+
+            likedByMe = likeRepository.existsByUserIdAndPostId(currentUserId, post.getId());
+        }
+
+        return PostMapper.toFeedPostResponse(post, likeCount, likedByMe);
+    }
+
 }

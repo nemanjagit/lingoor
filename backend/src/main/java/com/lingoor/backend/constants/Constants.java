@@ -3,7 +3,6 @@ package com.lingoor.backend.constants;
 public class Constants {
 
     public static final String FRONTEND_APP_URL = "http://localhost:4200";
-    public static final String CLAIM_IDENTIFIER = "email";
     public static final String JWT_SECRET_KEY = "JWT_SECRET";
     public static final String JWT_SECRET_KEY_DEFAULT_VALUE = "jxgEQeXHuPq8VdbyYFNkANdudQ53YUn4";
     public static final String AUTH_HEADER = "Authorization";
@@ -15,4 +14,5 @@ public class Constants {
     public static final String UNEXPECTED_ERROR = "An unexpected error occurred.";
     public static final String RESOURCE_NOT_FOUND = "Resource not found";
     public static final String ALREADY_FOLLOWING = "Already following user: ";
+    public static final String ACCESS_DENIED = "Access Denied to non admin user";
 }
