@@ -70,4 +70,11 @@ public class PostController {
         postService.deletePost(id, principal.getName());
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/word-of-the-day")
+    public ResponseEntity<FeedPostResponse> getWordOfTheDay(Principal principal) {
+        String email = (principal != null) ? principal.getName() : null;
+        FeedPostResponse response = postService.getWordOfTheDay(email);
+        return ResponseEntity.ok(response);
+    }
 }

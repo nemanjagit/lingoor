@@ -16,4 +16,8 @@ public interface PostService {
     List<FeedPostResponse> getCommunityFeed(String currentUserEmail, int page, int size);
 
     List<FeedPostResponse> getPersonalizedFeed(String currentUserEmail, int page, int size);
+
+    void setWordOfTheDay(Long postId);
+
+    FeedPostResponse getWordOfTheDay(String currentUserEmail);
 }
