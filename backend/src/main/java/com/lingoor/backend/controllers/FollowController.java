@@ -8,10 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.Map;
 
-/**
- * Controller to manage follow/unfollow actions.
- */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/users")
@@ -19,23 +17,32 @@ public class FollowController {
 
     private final FollowService followService;
 
-    @PostMapping("/{id}/follow")
-    public ResponseEntity<FollowResponse> followUser(
-            @PathVariable("id") Long id,
+    @GetMapping("/{id}/follow")
+    public ResponseEntity<Map<String, Boolean>> isFollowing(
+            @PathVariable("id") Long targetUserId,
             Principal principal
     ) {
         if (principal == null) throw new UnauthorizedException();
-        FollowResponse response = followService.followUser(principal.getName(), id);
-        return ResponseEntity.ok(response);
+        boolean following = followService.isFollowing(principal.getName(), targetUserId);
+        return ResponseEntity.ok(Map.of("following", following));
     }
 
-    @DeleteMapping("/{id}/follow")
-    public ResponseEntity<FollowResponse> unfollowUser(
-            @PathVariable("id") Long id,
+    @PostMapping("/{id}/follow")
+    public ResponseEntity<?> toggleFollow(
+            @PathVariable("id") Long targetUserId,
             Principal principal
     ) {
         if (principal == null) throw new UnauthorizedException();
-        FollowResponse response = followService.unfollowUser(principal.getName(), id);
-        return ResponseEntity.ok(response);
+        FollowResponse response = followService.toggleFollow(principal.getName(), targetUserId);
+        if (response == null) {
+            // Unfollowed — return new state false
+            return ResponseEntity.ok(Map.of("following", false));
+        }
+        // Followed — return full response
+        return ResponseEntity.ok(Map.of(
+                "following", true,
+                "followerId", response.followerId(),
+                "followedId", response.followedId()
+        ));
     }
 }

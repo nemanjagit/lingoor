@@ -10,6 +10,7 @@ import com.lingoor.backend.models.Follow;
 import com.lingoor.backend.models.Post;
 import com.lingoor.backend.models.User;
 import com.lingoor.backend.repositories.*;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -82,44 +83,100 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<FeedPostResponse> getCommunityFeed(String currentUserEmail, int page, int size) {
-        Long currentUserId;
+    public List<FeedPostResponse> getCommunityFeed(
+            String currentUserEmail,
+            String query,
+            String author,
+            String sort,
+            String from,
+            String to,
+            int page,
+            int size
+    ) {
+        Long currentUserId = null;
         if (currentUserEmail != null) {
             currentUserId = userRepository.findByEmail(currentUserEmail)
                     .map(User::getId)
                     .orElseThrow(() -> new IllegalArgumentException("User not found: " + currentUserEmail));
-        } else {
-            currentUserId = null;
         }
-        var pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        return postRepository.findAll(pageable)
-                .map(p -> {
-                    long likeCount = likeRepository.countByPostId(p.getId());
-                    boolean likedByMe = currentUserId != null && likeRepository.existsByUserIdAndPostId(currentUserId, p.getId());
-                    return PostMapper.toFeedPostResponse(p, likeCount, likedByMe);
-                })
-                .getContent();
+
+        Sort sortOption = switch (sort == null ? "date" : sort) {
+            case "likes" -> Sort.by(Sort.Direction.DESC, "likeCount");
+            default -> Sort.by(Sort.Direction.DESC, "createdAt");
+        };
+        PageRequest pageable = PageRequest.of(page, size, sortOption);
+
+        LocalDate fromDate = (from != null && !from.isBlank()) ? LocalDate.parse(from) : null;
+        LocalDate toDate = (to != null && !to.isBlank()) ? LocalDate.parse(to) : null;
+
+        Page<Post> posts = postRepository.searchPostsWithAuthors(
+                (query == null || query.isBlank()) ? null : query.trim(),
+                (author == null || author.isBlank()) ? null : author.trim(),
+                fromDate,
+                toDate,
+                null, // authorIds -> null means we take all (community feed)
+                pageable
+        );
+
+        Long finalCurrentUserId = currentUserId; // da bude effectively final za lambda
+        return posts.map(p -> {
+            long likeCount = likeRepository.countByPostId(p.getId());
+            boolean likedByMe = finalCurrentUserId != null && likeRepository.existsByUserIdAndPostId(finalCurrentUserId, p.getId());
+            return PostMapper.toFeedPostResponse(p, likeCount, likedByMe);
+        }).getContent();
     }
+
 
     @Override
     @Transactional(readOnly = true)
-    public List<FeedPostResponse> getPersonalizedFeed(String currentUserEmail, int page, int size) {
-        if (currentUserEmail == null) return Collections.emptyList();
+    public List<FeedPostResponse> getPersonalizedFeed(
+            String currentUserEmail,
+            String query,
+            String author,
+            String sort,
+            String from,
+            String to,
+            int page,
+            int size
+    ) {
+        if (currentUserEmail == null)
+            return Collections.emptyList();
+
         Long currentUserId = userRepository.findByEmail(currentUserEmail)
                 .map(User::getId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + currentUserEmail));
+
         List<Follow> follows = followRepository.findAllByFollower_Id(currentUserId);
-        if (follows.isEmpty()) return Collections.emptyList();
+        if (follows.isEmpty())
+            return Collections.emptyList();
+
         List<Long> authorIds = follows.stream().map(f -> f.getFollowed().getId()).toList();
-        var pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        return postRepository.findByAuthor_IdIn(authorIds, pageable)
-                .map(p -> {
-                    long likeCount = likeRepository.countByPostId(p.getId());
-                    boolean likedByMe = likeRepository.existsByUserIdAndPostId(currentUserId, p.getId());
-                    return PostMapper.toFeedPostResponse(p, likeCount, likedByMe);
-                })
-                .getContent();
+
+        Sort sortOption = switch (sort == null ? "date" : sort) {
+            case "likes" -> Sort.by(Sort.Direction.DESC, "likeCount");
+            default -> Sort.by(Sort.Direction.DESC, "createdAt");
+        };
+        PageRequest pageable = PageRequest.of(page, size, sortOption);
+
+        LocalDate fromDate = (from != null && !from.isBlank()) ? LocalDate.parse(from) : null;
+        LocalDate toDate = (to != null && !to.isBlank()) ? LocalDate.parse(to) : null;
+
+        Page<Post> posts = postRepository.searchPostsWithAuthors(
+                (query == null || query.isBlank()) ? null : query.trim(),
+                (author == null || author.isBlank()) ? null : author.trim(),
+                fromDate,
+                toDate,
+                authorIds, // personalized feed filters only followed users' posts
+                pageable
+        );
+
+        return posts.map(p -> {
+            long likeCount = likeRepository.countByPostId(p.getId());
+            boolean likedByMe = likeRepository.existsByUserIdAndPostId(currentUserId, p.getId());
+            return PostMapper.toFeedPostResponse(p, likeCount, likedByMe);
+        }).getContent();
     }
+
 
     @Transactional
     public void setWordOfTheDay(Long postId) {
@@ -164,5 +221,6 @@ public class PostServiceImpl implements PostService {
 
         return PostMapper.toFeedPostResponse(post, likeCount, likedByMe);
     }
+
 
 }

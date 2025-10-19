@@ -13,9 +13,27 @@ public interface PostService {
 
     void deletePost(Long id, String currentUserEmail);
 
-    List<FeedPostResponse> getCommunityFeed(String currentUserEmail, int page, int size);
+    List<FeedPostResponse> getCommunityFeed(
+            String currentUserEmail,
+            String query,
+            String author,
+            String sort,
+            String from,
+            String to,
+            int page,
+            int size
+    );
 
-    List<FeedPostResponse> getPersonalizedFeed(String currentUserEmail, int page, int size);
+    List<FeedPostResponse> getPersonalizedFeed(
+            String currentUserEmail,
+            String query,
+            String author,
+            String sort,
+            String from,
+            String to,
+            int page,
+            int size
+    );
 
     void setWordOfTheDay(Long postId);
 
