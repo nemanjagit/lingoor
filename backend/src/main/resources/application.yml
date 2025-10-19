@@ -16,9 +16,11 @@ spring:
   jackson:
     serialization:
       indent_output: true
+
 server:
   servlet:
     context-path: /api
+
 logging:
   level:
     org:
