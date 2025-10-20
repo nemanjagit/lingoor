@@ -3,6 +3,7 @@ package com.lingoor.backend.repositories;
 import com.lingoor.backend.models.Post;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -21,36 +22,27 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @Query("SELECT p FROM Post p LEFT JOIN p.likes l GROUP BY p.id ORDER BY COUNT(l) DESC")
     List<Post> findTop10MostLiked();
 
+    @EntityGraph(attributePaths = {"author"})
     @Query("""
-    SELECT p FROM Post p
-    WHERE (:query IS NULL OR LOWER(p.word) LIKE LOWER(CONCAT('%', :query, '%'))
-           OR LOWER(p.definition) LIKE LOWER(CONCAT('%', :query, '%')))
-      AND (:author IS NULL OR LOWER(p.author.username) = LOWER(:author))
-      AND (:from IS NULL OR p.createdAt >= :from)
-      AND (:to IS NULL OR p.createdAt <= :to)
-    """)
-    Page<Post> searchPosts(@Param("query") String query,
-                           @Param("author") String author,
-                           @Param("from") LocalDate from,
-                           @Param("to") LocalDate to,
-                           Pageable pageable);
+        SELECT p FROM Post p
+        WHERE (:query IS NULL
+               OR LOWER(p.word) LIKE LOWER(CONCAT('%', :query, '%'))
+               OR LOWER(p.definition) LIKE LOWER(CONCAT('%', :query, '%')))
+        """)
+    Page<Post> searchPostsWithAuthors(@Param("query") String query, Pageable pageable);
 
+
+    @EntityGraph(attributePaths = {"author"})
     @Query("""
-    SELECT p FROM Post p
-    WHERE (:query IS NULL OR LOWER(p.word) LIKE LOWER(CONCAT('%', :query, '%'))
-           OR LOWER(p.definition) LIKE LOWER(CONCAT('%', :query, '%')))
-      AND (:author IS NULL OR LOWER(p.author.username) = LOWER(:author))
-      AND (:fromDate IS NULL OR p.createdAt >= :fromDate)
-      AND (:toDate IS NULL OR p.createdAt <= :toDate)
-      AND (:authorIds IS NULL OR p.author.id IN :authorIds)
-    """)
-    Page<Post> searchPostsWithAuthors(
-            @Param("query") String query,
-            @Param("author") String author,
-            @Param("fromDate") LocalDate fromDate,
-            @Param("toDate") LocalDate toDate,
-            @Param("authorIds") List<Long> authorIds,
-            Pageable pageable
-    );
+        SELECT p FROM Post p
+        WHERE p.author.id IN :authorIds
+        AND (:query IS NULL
+             OR LOWER(p.word) LIKE LOWER(CONCAT('%', :query, '%'))
+             OR LOWER(p.definition) LIKE LOWER(CONCAT('%', :query, '%')))
+        """)
+    Page<Post> searchPostsByAuthorsAndQuery(@Param("authorIds") List<Long> authorIds,
+                                            @Param("query") String query,
+                                            Pageable pageable);
+
 
 }

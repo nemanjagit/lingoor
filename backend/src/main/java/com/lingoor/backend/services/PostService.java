@@ -16,10 +16,7 @@ public interface PostService {
     List<FeedPostResponse> getCommunityFeed(
             String currentUserEmail,
             String query,
-            String author,
             String sort,
-            String from,
-            String to,
             int page,
             int size
     );
@@ -27,10 +24,7 @@ public interface PostService {
     List<FeedPostResponse> getPersonalizedFeed(
             String currentUserEmail,
             String query,
-            String author,
             String sort,
-            String from,
-            String to,
             int page,
             int size
     );

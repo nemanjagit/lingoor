@@ -27,16 +27,13 @@ public class PostController {
     public ResponseEntity<List<FeedPostResponse>> getCommunityFeed(
             Principal principal,
             @RequestParam(required = false) String query,
-            @RequestParam(required = false) String author,
             @RequestParam(required = false) String sort,
-            @RequestParam(required = false) String from,
-            @RequestParam(required = false) String to,
             @RequestParam(defaultValue = "0") @Min(0) int page,
-            @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size
+            @RequestParam(defaultValue = "10") @Min(1) @Max(100) int size
     ) {
         String email = (principal != null) ? principal.getName() : null;
         return ResponseEntity.ok(
-                postService.getCommunityFeed(email, query, author, sort, from, to, page, size)
+                postService.getCommunityFeed(email, query, sort, page, size)
         );
     }
 
@@ -44,16 +41,13 @@ public class PostController {
     public ResponseEntity<List<FeedPostResponse>> getPersonalizedFeed(
             Principal principal,
             @RequestParam(required = false) String query,
-            @RequestParam(required = false) String author,
             @RequestParam(required = false) String sort,
-            @RequestParam(required = false) String from,
-            @RequestParam(required = false) String to,
             @RequestParam(defaultValue = "0") @Min(0) int page,
-            @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size
+            @RequestParam(defaultValue = "10") @Min(1) @Max(100) int size
     ) {
         if (principal == null) throw new UnauthorizedException();
         return ResponseEntity.ok(
-                postService.getPersonalizedFeed(principal.getName(), query, author, sort, from, to, page, size)
+                postService.getPersonalizedFeed(principal.getName(), query, sort, page, size)
         );
     }
 

@@ -66,6 +66,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "register", "login").permitAll()
                         .requestMatchers(HttpMethod.GET,  "posts").permitAll()                           // ONLY the community feed
                         .requestMatchers(HttpMethod.GET,  "posts/*/likes/count").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/posts/word-of-the-day").permitAll()
                         .requestMatchers("admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )

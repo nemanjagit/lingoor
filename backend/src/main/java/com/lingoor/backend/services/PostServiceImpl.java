@@ -6,7 +6,6 @@ import com.lingoor.backend.dtos.PostResponse;
 import com.lingoor.backend.exceptions.ResourceNotFoundException;
 import com.lingoor.backend.mappers.PostMapper;
 import com.lingoor.backend.models.DailyHighlight;
-import com.lingoor.backend.models.Follow;
 import com.lingoor.backend.models.Post;
 import com.lingoor.backend.models.User;
 import com.lingoor.backend.repositories.*;
@@ -86,45 +85,42 @@ public class PostServiceImpl implements PostService {
     public List<FeedPostResponse> getCommunityFeed(
             String currentUserEmail,
             String query,
-            String author,
             String sort,
-            String from,
-            String to,
             int page,
             int size
     ) {
         Long currentUserId = null;
+
         if (currentUserEmail != null) {
             currentUserId = userRepository.findByEmail(currentUserEmail)
                     .map(User::getId)
                     .orElseThrow(() -> new IllegalArgumentException("User not found: " + currentUserEmail));
         }
 
+        // Determine sorting option
         Sort sortOption = switch (sort == null ? "date" : sort) {
-            case "likes" -> Sort.by(Sort.Direction.DESC, "likeCount");
+            case "oldest" -> Sort.by(Sort.Direction.ASC, "createdAt");
             default -> Sort.by(Sort.Direction.DESC, "createdAt");
         };
+
         PageRequest pageable = PageRequest.of(page, size, sortOption);
 
-        LocalDate fromDate = (from != null && !from.isBlank()) ? LocalDate.parse(from) : null;
-        LocalDate toDate = (to != null && !to.isBlank()) ? LocalDate.parse(to) : null;
+        // Trim and normalize query
+        String trimmedQuery = (query == null || query.isBlank()) ? null : query.trim();
 
-        Page<Post> posts = postRepository.searchPostsWithAuthors(
-                (query == null || query.isBlank()) ? null : query.trim(),
-                (author == null || author.isBlank()) ? null : author.trim(),
-                fromDate,
-                toDate,
-                null, // authorIds -> null means we take all (community feed)
-                pageable
-        );
+        Page<Post> posts = postRepository.searchPostsWithAuthors(trimmedQuery, pageable);
 
-        Long finalCurrentUserId = currentUserId; // da bude effectively final za lambda
+        Long finalCurrentUserId = currentUserId; // effectively final for lambda
+
         return posts.map(p -> {
             long likeCount = likeRepository.countByPostId(p.getId());
-            boolean likedByMe = finalCurrentUserId != null && likeRepository.existsByUserIdAndPostId(finalCurrentUserId, p.getId());
+            boolean likedByMe = finalCurrentUserId != null &&
+                    likeRepository.existsByUserIdAndPostId(finalCurrentUserId, p.getId());
+
             return PostMapper.toFeedPostResponse(p, likeCount, likedByMe);
         }).getContent();
     }
+
 
 
     @Override
@@ -132,10 +128,7 @@ public class PostServiceImpl implements PostService {
     public List<FeedPostResponse> getPersonalizedFeed(
             String currentUserEmail,
             String query,
-            String author,
             String sort,
-            String from,
-            String to,
             int page,
             int size
     ) {
@@ -146,29 +139,23 @@ public class PostServiceImpl implements PostService {
                 .map(User::getId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + currentUserEmail));
 
-        List<Follow> follows = followRepository.findAllByFollower_Id(currentUserId);
-        if (follows.isEmpty())
+        List<Long> followedIds = followRepository.findAllByFollower_Id(currentUserId)
+                .stream()
+                .map(f -> f.getFollowed().getId())
+                .toList();
+
+        if (followedIds.isEmpty())
             return Collections.emptyList();
 
-        List<Long> authorIds = follows.stream().map(f -> f.getFollowed().getId()).toList();
-
         Sort sortOption = switch (sort == null ? "date" : sort) {
-            case "likes" -> Sort.by(Sort.Direction.DESC, "likeCount");
+            case "oldest" -> Sort.by(Sort.Direction.ASC, "createdAt");
             default -> Sort.by(Sort.Direction.DESC, "createdAt");
         };
+
         PageRequest pageable = PageRequest.of(page, size, sortOption);
+        String trimmedQuery = (query == null || query.isBlank()) ? null : query.trim();
 
-        LocalDate fromDate = (from != null && !from.isBlank()) ? LocalDate.parse(from) : null;
-        LocalDate toDate = (to != null && !to.isBlank()) ? LocalDate.parse(to) : null;
-
-        Page<Post> posts = postRepository.searchPostsWithAuthors(
-                (query == null || query.isBlank()) ? null : query.trim(),
-                (author == null || author.isBlank()) ? null : author.trim(),
-                fromDate,
-                toDate,
-                authorIds, // personalized feed filters only followed users' posts
-                pageable
-        );
+        Page<Post> posts = postRepository.searchPostsByAuthorsAndQuery(followedIds, trimmedQuery, pageable);
 
         return posts.map(p -> {
             long likeCount = likeRepository.countByPostId(p.getId());

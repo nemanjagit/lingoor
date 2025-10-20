@@ -8,6 +8,7 @@ public record FeedPostResponse(
         String definition,
         LocalDateTime createdAt,
         String authorUsername,
+        Long authorId,
         Long likeCount,
         boolean likedByMe
 ) {}

@@ -33,6 +33,7 @@ public class PostMapper {
                 post.getDefinition(),
                 post.getCreatedAt(),
                 post.getAuthor().getUsername(),
+                post.getAuthor().getId(),
                 likeCount,
                 likedByMe
         );
