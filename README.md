@@ -276,4 +276,4 @@ POST /api/admin/word-of-the-day/5    → set WOTD (admin)
 
 ## 🧩 License
 
-© 2025 — Lingoor (academic demo project)
+© 2025 - Lingoor (academic demo project)
