@@ -46,6 +46,7 @@ src/environments/*.local.ts
 src/environments/*.private.ts
 
 # IDEs and editors
+.idea
 .project
 .classpath
 .c9/
