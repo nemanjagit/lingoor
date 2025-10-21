@@ -1,4 +1,4 @@
-# 🪶 Lingoor — Full‑Stack Application
+# 🪶 Lingoor - Full‑Stack word definition Application
 
 **Lingoor** is a full‑stack web application built with **Spring Boot** and **Angular**.  
 Users can post and explore word definitions, follow authors, like posts, and view a daily highlighted word chosen by admins. The app demonstrates a modern SPA architecture with JWT authentication, RESTful APIs, pagination & filtering, and a responsive UI.
