@@ -9,7 +9,7 @@ Users can post and explore word definitions, follow authors, like posts, and vie
 
 | Layer | Technology |
 |---|---|
-| Frontend | Angular 17+ (standalone components), SCSS, Bootstrap 5 |
+| Frontend | Angular 20 (standalone components), SCSS, Bootstrap 5 |
 | Backend | Spring Boot 3 (Java 17) |
 | Database | MySQL |
 | Auth | JWT (JSON Web Token) |
@@ -36,12 +36,16 @@ lingoor/
 ### Architecture (packages)
 
 ```plaintext
+config/          ← JWT + Spring Security
+constants/       ← Contant values, magic strings..
 controllers/     ← REST API endpoints
-services/        ← Business logic
-repositories/    ← Spring Data JPA
+dtos/            ← Request/Response objects
+exceptions/      ← Custom exceptions + GlobalExceptionHandler
+filters/         ← JwtAuthenticationFilter
+mappers/         ← to/from Entity/Response/Request
 models/          ← JPA entities
-security/        ← JWT + Spring Security
-dto/             ← Request/Response objects
+repositories/    ← Spring Data JPA
+services/        ← Business logic
 ```
 
 **Key controllers**
@@ -86,8 +90,8 @@ dto/             ← Request/Response objects
 
 | Method | Endpoint | Description | Auth |
 |---|---|---|---|
-| POST | `/api/auth/register` | Register (email, username, password) | Public |
-| POST | `/api/auth/login` | Authenticate; returns JWT | Public |
+| POST | `/api/register` | Register (email, username, password) | Public |
+| POST | `/api/login` | Authenticate; returns JWT | Public |
 
 **Login response**
 ```json
@@ -163,14 +167,19 @@ dto/             ← Request/Response objects
 ```plaintext
 src/app/
 ├─ core/
+│  ├─ guards/             (AdminGuard, AuthGuard)
+│  ├─ interceptors/       (AuthInterceptor)
+│  ├─ models/             (Post)
 │  ├─ services/           (AuthService, PostsService, HttpErrorHandlerService)
-│  └─ header/             (Header)
+│  └─ header/             (header)
 ├─ features/
 │  ├─ auth/               (login, register)
 │  ├─ feed/               (community-feed, personalized-feed, post-card, feed-filters, word-of-the-day, create-post)
 │  └─ admin/              (reports)
 ├─ shared/
 │  └─ toast/              (Toast)
+│  └─ confirm-dialog/
+├─ environments/
 └─ app.routes.ts
 ```
 
@@ -256,29 +265,9 @@ POST /api/admin/word-of-the-day/5    → set WOTD (admin)
 
 ---
 
-## 🎓 Course Concepts Covered (Angular)
-
-- Architecture & folder separation (`core`, `features`, `shared`)
-- CSS rules & selectors; component SCSS + global styles
-- Flexbox & Bootstrap grid
-- TypeScript interfaces/DTOs
-- Standalone components, no NgModules
-- Data binding & pipes (custom pipe optional)
-- Attribute directives (e.g., `[class.active]`)
-- Structural directives (`@if`, `@for`)
-- Parent–child comms (`@Input`/`@Output`)
-- Template‑driven forms (Login/Register) + validation
-- Reactive forms (FeedFilters) *(or template‑driven variant)*
-- Services & DI; Observables for HTTP
-- `HttpClient` + `HttpParams`
-- Interceptor (JWT)
-- Routing, route activation & guards (Auth/Admin)
-
----
 
 ## 🧾 Notes
 
-- Demo data: ~5 users (IDs 1–5), ~25 posts with random likes/follows  
 - Default feed sort: `newest`  
 - All endpoints return JSON, except admin reports (PDF)  
 - CORS enabled for `http://localhost:4200`
