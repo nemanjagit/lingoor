@@ -1,0 +1,20 @@
+<div class="container py-4">
+  <h4 class="mb-4 text-center">Admin Reports</h4>
+
+  <div class="reports-card">
+    <p>Select a report to download as PDF:</p>
+
+    <div class="btn-group">
+      <button (click)="downloadReport('most-liked')" class="btn btn-primary">
+        Most Liked Posts
+      </button>
+      <button (click)="downloadReport('most-followed')" class="btn btn-primary">
+        Most Followed Users
+      </button>
+      <button
+        (click)="downloadReport('word-of-the-day-history')" class="btn btn-primary">
+        Word of the Day History
+      </button>
+    </div>
+  </div>
+</div>
