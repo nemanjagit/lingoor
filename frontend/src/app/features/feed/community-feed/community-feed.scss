@@ -11,6 +11,13 @@ h5 {
   color: $primary;
   font-weight: 600;
   margin-bottom: 1rem;
+
+  &::after {
+    content: '  (Whole Community)';
+    font-weight: 400;
+    color: $text-muted;
+    font-size: 0.9rem;
+  }
 }
 
 .text-muted {

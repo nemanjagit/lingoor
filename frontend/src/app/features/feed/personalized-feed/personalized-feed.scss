@@ -13,7 +13,7 @@ h5 {
   margin-bottom: 1rem;
 
   &::after {
-    content: ' (Your Feed)';
+    content: '  (Followed Users)';
     font-weight: 400;
     color: $text-muted;
     font-size: 0.9rem;
