@@ -74,7 +74,10 @@ public class PostServiceImpl implements PostService {
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + currentUserEmail));
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Post not found: " + id));
-        if (!post.getAuthor().getId().equals(user.getId())) {
+
+        boolean isAdmin = user.getRole().getName().equals("ROLE_ADMIN");
+        boolean isAuthor = post.getAuthor().getId().equals(user.getId());
+        if (!isAdmin && !isAuthor) {
             throw new IllegalStateException("Forbidden");
         }
         postRepository.delete(post);
@@ -89,12 +92,14 @@ public class PostServiceImpl implements PostService {
             int page,
             int size
     ) {
-        Long currentUserId = null;
+        Long currentUserId;
 
         if (currentUserEmail != null) {
             currentUserId = userRepository.findByEmail(currentUserEmail)
                     .map(User::getId)
                     .orElseThrow(() -> new IllegalArgumentException("User not found: " + currentUserEmail));
+        } else {
+            currentUserId = null;
         }
 
         // Determine sorting option
@@ -116,8 +121,10 @@ public class PostServiceImpl implements PostService {
             long likeCount = likeRepository.countByPostId(p.getId());
             boolean likedByMe = finalCurrentUserId != null &&
                     likeRepository.existsByUserIdAndPostId(finalCurrentUserId, p.getId());
+            boolean followingAuthor = currentUserId != null &&
+                    followRepository.existsByFollower_IdAndFollowed_Id(currentUserId, p.getAuthor().getId());
 
-            return PostMapper.toFeedPostResponse(p, likeCount, likedByMe);
+            return PostMapper.toFeedPostResponse(p, likeCount, likedByMe, followingAuthor);
         }).getContent();
     }
 
@@ -160,7 +167,9 @@ public class PostServiceImpl implements PostService {
         return posts.map(p -> {
             long likeCount = likeRepository.countByPostId(p.getId());
             boolean likedByMe = likeRepository.existsByUserIdAndPostId(currentUserId, p.getId());
-            return PostMapper.toFeedPostResponse(p, likeCount, likedByMe);
+            boolean followingAuthor = currentUserId != null &&
+                    followRepository.existsByFollower_IdAndFollowed_Id(currentUserId, p.getAuthor().getId());
+            return PostMapper.toFeedPostResponse(p, likeCount, likedByMe, followingAuthor);
         }).getContent();
     }
 
@@ -205,8 +214,9 @@ public class PostServiceImpl implements PostService {
 
             likedByMe = likeRepository.existsByUserIdAndPostId(currentUserId, post.getId());
         }
+        boolean followingAuthor = false; // not needed for WOTD
 
-        return PostMapper.toFeedPostResponse(post, likeCount, likedByMe);
+        return PostMapper.toFeedPostResponse(post, likeCount, likedByMe, followingAuthor);
     }
 
 

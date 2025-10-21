@@ -1,0 +1,34 @@
+<div class="container py-3">
+  <app-word-of-the-day></app-word-of-the-day>
+
+  <app-feed-filters (filtersChanged)="onFiltersChanged($event)"></app-feed-filters>
+
+  <div class="mt-4">
+    <h5 class="mb-3">Personalized Feed</h5>
+
+    @if (posts.length > 0) {
+      @for (post of posts; track post.id) {
+        <div class="mb-3">
+          <app-post-card [post]="post" (postDeleted)="onPostDeleted()"></app-post-card>
+        </div>
+      }
+
+      @if (!allLoaded) {
+        <div class="d-flex justify-content-center mt-3">
+          <button
+            class="btn btn-outline-primary"
+            (click)="loadMore()"
+            [disabled]="loading"
+          >
+            @if (loading) { Loading... } @else { Load More }
+          </button>
+        </div>
+      } @else {
+        <p class="text-muted text-center mt-3">No more posts to show.</p>
+      }
+    } @else {
+      <p class="text-muted">No posts available.</p>
+    }
+  </div>
+  <app-create-post (postCreated)="loadPosts(true)"></app-create-post>
+</div>

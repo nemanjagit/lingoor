@@ -1,0 +1,6 @@
+<div class="toast-container" *ngIf="visible">
+  <div class="toast" [ngClass]="type">
+    <span>{{ message }}</span>
+    <button class="close-btn" (click)="hide()">&times;</button>
+  </div>
+</div>

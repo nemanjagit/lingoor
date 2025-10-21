@@ -1,0 +1,25 @@
+@use 'variables' as *;
+
+.container {
+  background-color: $background;
+  color: $text;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+h5 {
+  color: $primary;
+  font-weight: 600;
+  margin-bottom: 1rem;
+
+  &::after {
+    content: ' (Your Feed)';
+    font-weight: 400;
+    color: $text-muted;
+    font-size: 0.9rem;
+  }
+}
+
+.text-muted {
+  color: $text-muted !important;
+}

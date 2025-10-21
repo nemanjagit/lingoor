@@ -1,0 +1,47 @@
+@use 'variables' as *;
+
+.toast-container {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 1050;
+}
+
+.toast {
+  background-color: $surface;
+  color: $text;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 250px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+
+  &.success {
+    border-left: 4px solid $success;
+  }
+
+  &.error {
+    border-left: 4px solid $danger;
+  }
+
+  &.info {
+    border-left: 4px solid $primary;
+  }
+
+  .close-btn {
+    background: none;
+    border: none;
+    color: $text-muted;
+    font-size: 1.25rem;
+    cursor: pointer;
+    line-height: 1;
+
+    &:hover {
+      color: $text;
+    }
+  }
+}

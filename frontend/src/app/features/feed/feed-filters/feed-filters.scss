@@ -1,0 +1,15 @@
+.filters-container {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+
+  input,
+  select {
+    min-width: 160px;
+  }
+
+  button {
+    white-space: nowrap;
+  }
+}

@@ -1,0 +1,39 @@
+<!-- Floating + Button -->
+<button class="floating-btn btn btn-primary rounded-circle shadow"
+        (click)="toggleModal()">
+  <i class="bi bi-plus-lg fs-4"></i>
+</button>
+
+<!-- Modal Overlay -->
+@if (showModal) {
+  <div class="overlay" (click)="toggleModal()"></div>
+
+  <div class="create-post-modal p-4 shadow rounded-4 bg-white">
+    <h5 class="mb-3 text-center fw-semibold">Create a New Post</h5>
+
+    <form (ngSubmit)="createPost()">
+      <div class="mb-3">
+        <label class="form-label">Word</label>
+        <input type="text" class="form-control" [(ngModel)]="word" name="word" required />
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Definition</label>
+        <textarea
+          class="form-control"
+          [(ngModel)]="definition"
+          name="definition"
+          rows="3"
+          required
+        ></textarea>
+      </div>
+
+      <div class="d-flex justify-content-end gap-2 mt-3">
+        <button type="button" class="btn btn-outline-secondary" (click)="toggleModal()">Cancel</button>
+        <button class="btn btn-success" [disabled]="loading">
+          @if (loading) { Creating... } @else { Create }
+        </button>
+      </div>
+    </form>
+  </div>
+}

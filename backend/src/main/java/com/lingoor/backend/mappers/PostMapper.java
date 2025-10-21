@@ -26,7 +26,7 @@ public class PostMapper {
         );
     }
 
-    public static FeedPostResponse toFeedPostResponse(Post post, long likeCount, boolean likedByMe) {
+    public static FeedPostResponse toFeedPostResponse(Post post, long likeCount, boolean likedByMe, boolean followingAuthor) {
         return new FeedPostResponse(
                 post.getId(),
                 post.getWord(),
@@ -35,7 +35,8 @@ public class PostMapper {
                 post.getAuthor().getUsername(),
                 post.getAuthor().getId(),
                 likeCount,
-                likedByMe
+                likedByMe,
+                followingAuthor
         );
     }
 }

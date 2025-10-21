@@ -1,0 +1,21 @@
+// Bootstrap
+@use "bootstrap/scss/bootstrap";
+
+// 🎨 Custom global theme variables
+@use 'variables' as *;
+
+body {
+  background-color: $background;
+  color: $text;
+  font-family: "Inter", "Segoe UI", sans-serif;
+  margin: 0;
+  padding: 90px;
+}
+
+a {
+  text-decoration: none;
+}
+
+.container {
+  max-width: 960px;
+}

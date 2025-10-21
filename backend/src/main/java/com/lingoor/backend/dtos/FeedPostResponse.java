@@ -10,5 +10,6 @@ public record FeedPostResponse(
         String authorUsername,
         Long authorId,
         Long likeCount,
-        boolean likedByMe
+        boolean likedByMe,
+        boolean followingAuthor
 ) {}
