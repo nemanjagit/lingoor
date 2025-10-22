@@ -8,8 +8,15 @@ import { AuthGuard } from './core/guards/auth.guard';
 import { AdminGuard } from './core/guards/admin.guard';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'feed/community', pathMatch: 'full' },
-  { path: 'feed/community', component: CommunityFeed },
+  {
+    path: '',
+    redirectTo: 'feed/community',
+    pathMatch: 'full'
+  },
+  {
+    path: 'feed/community',
+    component: CommunityFeed
+  },
   {
     path: 'feed/personalized',
     component: PersonalizedFeed,

@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { tap } from 'rxjs/operators';
 import { jwtDecode } from 'jwt-decode';
 import { environment } from '../../../environments/environment';
-import { BehaviorSubject } from 'rxjs';
+import { Observable, BehaviorSubject } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -11,7 +11,7 @@ export class AuthService {
   private tokenKey = 'lingoor_token';
   private loggedInSubject = new BehaviorSubject<boolean>(this.isLoggedIn());
 
-  loggedIn$ = this.loggedInSubject.asObservable();
+  loggedIn$: Observable<boolean> = this.loggedInSubject.asObservable();
 
   constructor(private http: HttpClient) {}
 
